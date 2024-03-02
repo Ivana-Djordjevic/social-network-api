@@ -38,6 +38,8 @@ THEN I am able to successfully create and delete reactions to thoughts and add a
 
 Walkthrough video:
 
+[social-network-api.webm](https://github.com/Ivana-Djordjevic/social-network-api/assets/127266659/7923c73e-990a-4db8-a9f3-c8c839815b01)
+
 [walkthrough video link](https://drive.google.com/file/d/1kd6xCdjiy0WTougbdX01yTvdWhdUjhFy/view)
 
 ## Installation
