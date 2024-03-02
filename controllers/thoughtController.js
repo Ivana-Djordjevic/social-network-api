@@ -1,11 +1,15 @@
-const { Thought } = require('../models');
+const { Thought, User } = require('../models');
+const { ObjectId } = require('mongoose').Types;
 
 module.exports = {
   // Get all thought
   async getThoughts(req, res) {
     try {
-      const thoughts = await Thought.find().populate('reactions');
+      const thoughts = await Thought.find({}).populate('reactions');
       res.json(thoughts);
+      if (!thoughts) {
+        return res.status(404).json({ message: 'No thughts found' });
+      }
     } catch (err) {
       console.log(err)
       res.status(500).json(err);
@@ -33,6 +37,13 @@ module.exports = {
   async createThought(req, res) {
     try {
       const thought = await Thought.create(req.body);
+      const user = await User.findOne({username: req.body.username})
+
+      if(user) {
+        user.thoughts.push(thought._id)
+        await user.save()
+      }
+
       res.json(thought);
     } catch (err) {
       console.log(err);
@@ -83,7 +94,10 @@ module.exports = {
       const thought = await Thought.findOne(
         { _id: req.params.thoughtId}
       );
-  
+      
+      console.log('thought found:')
+      console.log(thought)
+
       if (!thought) {
         return res.status(404).json({ error: 'Thought not found' });
       }
@@ -105,17 +119,18 @@ module.exports = {
   },
   // delete reaction 
   async deleteReactionFromThought(req, res) {
-    const { thoughtId, reactionId } = req.params;
+    const { thoughtId } = req.params;
+    const { reactionId } = req.body;
   
     try {
-      const thought = await Thought.findOne(thoughtId);
+      const thought = await Thought.findOne({_id: thoughtId});
   
       if (!thought) {
         return res.status(404).json({ error: 'Thought not found' });
       }
 
       const reactionIndex = thought.reactions.findIndex(
-        reaction => reaction._id.toString() === reactionId
+        (reaction) => reaction.reactionId.equals(new ObjectId(reactionId)) 
       );
   
       if (reactionIndex === -1) {

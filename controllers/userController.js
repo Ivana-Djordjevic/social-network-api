@@ -1,11 +1,20 @@
 const { ObjectId } = require('mongoose').Types;
-const { User } = require('../models');
+const { User, Thought } = require('../models');
 
 module.exports = {
   // Get all users
   async getUsers(req, res) {
     try {
-      const users = await User.find();
+      const users = await User.find({})
+        .populate('friends')
+        .populate('thoughts');
+      
+      if (!users) {
+        return res.status(404).json({ message: 'No users found' });
+      }
+      if (users.length === 0) {
+        return res.status(404).json({ message: 'No users found' });
+      }
       res.json(users);
     } catch (err) {
       console.log(err);
@@ -17,7 +26,9 @@ module.exports = {
     try {
       const user = await User.findOne(
         { _id: req.params.userId }
-      );
+      )
+        .populate('friends')
+        .populate('thoughts');
 
       if (!user) {
         return res.status(404).json({ message: 'No user with that ID' })
@@ -60,15 +71,16 @@ module.exports = {
   // Delete a user 
   async deleteUser(req, res) {
     try {
-      const user = await User.findOneAndRemove(
-        { _id: req.params.userId }
-        );
+      const user = await User.findOne({ _id: req.params.userId})
 
       if (!user) {
         return res
           .status(404)
           .json({ message: 'No such user exists' });
       }
+
+      await Thought.deleteMany({ username: user.username})
+      await user.deleteOne()
 
       res.json({ message: 'User successfully deleted' });
     } catch (err) {
@@ -85,7 +97,7 @@ module.exports = {
     try {
       const user = await User.findOneAndUpdate(
         { _id: req.params.userId },
-        { $addToSet: { friends: req.body } },
+        { $addToSet: { friends: req.body.friendId } },
         { runValidators: true, new: true }
       );
 
@@ -103,6 +115,9 @@ module.exports = {
   },
   // Remove friend from a user
   async removeFriend(req, res) {
+    console.log('you are removing a friend')
+    console.log(req.params.friendId)
+
     try {
       const user = await User.findOneAndUpdate(
         { _id: req.params.userId },

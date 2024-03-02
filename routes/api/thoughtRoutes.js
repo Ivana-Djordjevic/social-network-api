@@ -11,18 +11,19 @@ const {
 
 // /api/thoughts
 router.route('/')
-  .get(getThoughts)
-  .post(createThought);
+  .get(getThoughts) // works
+  .post(createThought); //works partially
 
 // /api/thoughts/:thoughtId
 router.route('/:thoughtId')
-  .get(getSingleThought)
-  .put(updateThought)
-  .delete(deleteThought);
+  .get(getSingleThought) //works
+  .put(updateThought) //works
+  .delete(deleteThought); //works
 
 //api/thoughts/:thoughtId/reactions
 router.route('/:thoughtId/reactions')
-  .post(createReactionToThought)
-  .delete(deleteReactionFromThought);
+  .post(createReactionToThought) // DOES NOT work
+  .delete(deleteReactionFromThought); //cannot test because cannot POST
+  // it says Thought validation failed
 
 module.exports = router;
